@@ -27,17 +27,17 @@ SVGPathNormalizer.normalizeSingleSeg = function(seg, curX, curY, startX, startY)
 	switch(seg.pathSegType) {
 		// z
 		case PATHSEG_CLOSEPATH:
-			newSeg = path.createSVGPathSegClosePath();
 			newX = startX;
 			newY = startY;
+			newSeg = path.createSVGPathSegClosePath();
 			break;
 		case 
 		
 		// M
 		case PATHSEG_MOVETO_ABS:
-			newSeg = seg;
 			newX = seg.x;
 			newY = seg.y;
+			newSeg = seg;
 			break;
 		
 		// m
@@ -48,20 +48,86 @@ SVGPathNormalizer.normalizeSingleSeg = function(seg, curX, curY, startX, startY)
 			break;
 		
 		case PATHSEG_LINETO_ABS:
+			newX = seg.x;
+			newY = seg.y;
+			newSeg = seg;
+			break;
+		
 		case PATHSEG_LINETO_REL:
+			newX = curX + seg.x;
+			newY = curY + seg.y;
+			newSeg = path.createSVGPathSegLinetoAbs(newX, newY);
+			break;
+		
 		case PATHSEG_CURVETO_CUBIC_ABS:
+			newX = seg.x;
+			newY = seg.y;
+			newSeg = seg;
+			break;
+		
 		case PATHSEG_CURVETO_CUBIC_REL:
+			newX = curX + seg.x;
+			newY = curY + seg.y;
+			newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, (curX + seg.x1), (curY + seg.y1), (curX + seg.x2), (curY + seg.y2));
+			break;
+		
 		case PATHSEG_CURVETO_QUADRATIC_ABS:
+			newX = seg.x;
+			newY = seg.y;
+			newSeg = seg;
+			break;
+		
 		case PATHSEG_CURVETO_QUADRATIC_REL:
+			newX = curX + seg.x;
+			newY = curY + seg.y;
+			newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, (curX + seg.x1), (curY + seg.y1));
+			break;
+		
 		case PATHSEG_ARC_ABS:
+			newX = seg.x;
+			newY = seg.y;
+			newSeg = seg;
+			break;
+		
 		case PATHSEG_ARC_REL:
+			newX = curX + seg.x;
+			newY = curY + seg.y;
+			newSeg = path.createSVGPathSegArcAbs(newX, newY, seg.r1, seg.r2, seg.angle, seg.largeArgFlag, seg.sweepFlag);
+			break;
+		
 		case PATHSEG_LINETO_HORIZONTAL_ABS:
+			newX = seg.x;
+			newY = curY;
+			newSeg = seg;
+			break;
+		
 		case PATHSEG_LINETO_HORIZONTAL_REL:
+			newX = curX + seg.x;
+			newY = curY;
+			newSeg = path.createSVGPathSegLinetoHorizontalAbs(newX);
+			break;
+		
 		case PATHSEG_LINETO_VERTICAL_ABS:
+			newX = curX;
+			newY = seg.y;
+			newSeg = seg;
+			break;
+		
 		case PATHSEG_LINETO_VERTICAL_REL:
+		
 		case PATHSEG_CURVETO_CUBIC_SMOOTH_ABS:
+			newX = seg.x;
+			newY = seg.y;
+			newSeg = seg;
+			break;
+		
 		case PATHSEG_CURVETO_CUBIC_SMOOTH_REL:
 		case PATHSEG_CURVETO_QUADRATIC_SMOOTH_ABS:
+			newX = seg.x;
+			newY = seg.y;
+			newSeg = seg;
+			break;
+		
 		case PATHSEG_CURVETO_QUADRATIC_SMOOTH_REL:
 		default:
 	}
