@@ -14,8 +14,8 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 	var startY = null;
 	var lastCommandIsCubicBezier = false;
 	var lastCommandIsQuadraticBezier = false;
-	var lastControllX = null;
-	var lastControllY = null;
+	var lastControlX = null;
+	var lastControlY = null;
 	var thisCommandIsCubicBezier = false;
 	var thisCommandIsQuadraticBezier = false;
 	
@@ -63,8 +63,8 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 			case SVGPathSeg.PATHSEG_CURVETO_CUBIC_ABS:
 				newX = seg.x;
 				newY = seg.y;
-				lastControllX = seg.x2;
-				lastControllY = seg.y2;
+				lastControlX = seg.x2;
+				lastControlY = seg.y2;
 				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, seg.x1, seg.y1, seg.x2, seg.y2);
 				thisCommandIsCubicBezier = true;
 				break;
@@ -72,8 +72,8 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 			case SVGPathSeg.PATHSEG_CURVETO_CUBIC_REL:
 				newX = curX + seg.x;
 				newY = curY + seg.y;
-				lastControllX = curX + seg.x2;
-				lastControllY = curY + seg.y2;
+				lastControlX = curX + seg.x2;
+				lastControlY = curY + seg.y2;
 				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, (curX + seg.x1), (curY + seg.y1), (curX + seg.x2), (curY + seg.y2));
 				thisCommandIsCubicBezier = true;
 				break;
@@ -81,8 +81,8 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 			case SVGPathSeg.PATHSEG_CURVETO_QUADRATIC_ABS:
 				newX = seg.x;
 				newY = seg.y;
-				lastControllX = seg.x1;
-				lastControllY = seg.y1;
+				lastControlX = seg.x1;
+				lastControlY = seg.y1;
 				newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, seg.x1, seg.y1);
 				thisCommandIsQuadraticBezier = true;
 				break;
@@ -90,8 +90,8 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 			case SVGPathSeg.PATHSEG_CURVETO_QUADRATIC_REL:
 				newX = curX + seg.x;
 				newY = curY + seg.y;
-				lastControllX = curX + seg.x1;
-				lastControllY = curY + seg.y1;
+				lastControlX = curX + seg.x1;
+				lastControlY = curY + seg.y1;
 				newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, (curX + seg.x1), (curY + seg.y1));
 				thisCommandIsQuadraticBezier = true;
 				break;
@@ -138,29 +138,29 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 				var firstControlX = curX;
 				var firstControlY = curY;
 				if(lastCommandIsCubicBezier) {
-					var refl = SVGPathNormalizer.getReflectionPoint(lastControllX, lastControllY, curX, curY);
+					var refl = SVGPathNormalizer.getReflectionPoint(lastControlX, lastControlY, curX, curY);
 					firstControlX = refl.x;
 					firstControlY = refl.y;
 				}
-				lastControllX = seg.x2;
-				lastControllY = seg.y2;
-				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, firstControlX, firstControlY, lastControllX, lastControllY);
+				lastControlX = seg.x2;
+				lastControlY = seg.y2;
+				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, firstControlX, firstControlY, lastControlX, lastControlY);
 				thisCommandIsCubicBezier = true;
 				break;
 			
 			case SVGPathSeg.PATHSEG_CURVETO_CUBIC_SMOOTH_REL:
 				newX = curX + seg.x;
-				newY = curX + seg.y;
+				newY = curY + seg.y;
 				var firstControlX = curX;
 				var firstControlY = curY;
 				if(lastCommandIsCubicBezier) {
-					var refl = SVGPathNormalizer.getReflectionPoint(lastControllX, lastControllY, curX, curY);
+					var refl = SVGPathNormalizer.getReflectionPoint(lastControlX, lastControlY, curX, curY);
 					firstControlX = refl.x;
 					firstControlY = refl.y;
 				}
-				lastControllX = (curX + seg.x2);
-				lastControllY = (curY + seg.y2);
-				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, firstControlX, firstControlY, lastControllX, lastControllY);
+				lastControlX = (curX + seg.x2);
+				lastControlY = (curY + seg.y2);
+				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, firstControlX, firstControlY, lastControlX, lastControlY);
 				thisCommandIsCubicBezier = true;
 				break;
 				
@@ -170,13 +170,13 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 				var firstControlX = curX;
 				var firstControlY = curY;
 				if(lastCommandIsQuadraticBezier) {
-					var refl = SVGPathNormalizer.getReflectionPoint(lastControllX, lastControllY, curX, curY);
+					var refl = SVGPathNormalizer.getReflectionPoint(lastControlX, lastControlY, curX, curY);
 					firstControlX = refl.x;
 					firstControlY = refl.y;
 				}
 				newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, firstControlX, firstControlY);
-				lastControllX = firstControlX;
-				lastControllY = firstControlY;
+				lastControlX = firstControlX;
+				lastControlY = firstControlY;
 				thisCommandIsQuadraticBezier = true;
 				break;
 			
@@ -186,13 +186,13 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 				var firstControlX = curX;
 				var firstControlY = curY;
 				if(lastCommandIsQuadraticBezier) {
-					var refl = SVGPathNormalizer.getReflectionPoint(lastControllX, lastControllY, curX, curY);
+					var refl = SVGPathNormalizer.getReflectionPoint(lastControlX, lastControlY, curX, curY);
 					firstControlX = refl.x;
 					firstControlY = refl.y;
 				}
 				newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, firstControlX, firstControlY);
-				lastControllX = firstControlX;
-				lastControllY = firstControlY;
+				lastControlX = firstControlX;
+				lastControlY = firstControlY;
 				thisCommandIsQuadraticBezier = true;
 				break;
 				
@@ -213,8 +213,8 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 		}
 		else {
 			// clear last controll point
-			lastControllX = null;
-			lastControllY = null;
+			lastControlX = null;
+			lastControlY = null;
 		}
 		lastCommandIsCubicBezier = thisCommandIsCubicBezier;
 		lastCommandIsQuadraticBezier = thisCommandIsQuadraticBezier;
@@ -223,9 +223,9 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 	return newPathSegList;
 };
 
-SVGPathNormalizer.getReflectionPoint = function(lastControllX, lastControllY, curX, curY) {
+SVGPathNormalizer.getReflectionPoint = function(lastControlX, lastControlY, curX, curY) {
 	return {
-		x: curX + (curX - lastControllX),
-		y: curY + (curY - lastControllY)
+		x: curX + (curX - lastControlX),
+		y: curY + (curY - lastControlY)
 	};
 };
