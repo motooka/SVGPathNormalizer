@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>SVGPathNormalizer Test Page</title>
+
+<script type="text/javascript" src="../src/svgpathnormalizer.js"></script>
+<script type="text/javascript">
+function drawBlackLine(buttonObj) {
+	var canvas = document.getElementById('svgCanvas');
+	var originalPath = document.getElementById('originalPath');
+	var normalizedPathSegList = SVGPathNormalizer.normalize(originalPath.pathSegList);
+	var pathSegListBufferArray = [];
+	for(var i=0; i<normalizedPathSegList.numberOfItems; i++) {
+		pathSegListBufferArray.push(normalizedPathSegList.getItem(i));
+	}
+	
+	var newPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+	newPath.setAttribute('id', 'newPath');
+	newPath.setAttribute('fill', 'none');
+	newPath.setAttribute('stroke', '#000000');
+	newPath.setAttribute('stroke-width', 1);
+	var newPathSegList = newPath.pathSegList;
+	newPathSegList.initialize(pathSegListBufferArray[0]);
+	for(var i=1; i<pathSegListBufferArray.length; i++) {
+		// on Safari, this operation affects normalizedPathSegList
+		newPathSegList.appendItem(pathSegListBufferArray[i]);
+	}
+	
+	canvas.appendChild(newPath);
+}
+</script>
+<style type="text/css">
+#svgCanvas {
+	border: 3px solid #c0c0c0;
+	margin: 15px;
+}
+</style>
+</head>
+<body>
+<h1>SVGPathNormalizer Test Page</h1>
+<p>
+	The red line is the original line. By clicking the button below, a black line will appear. If it does not differ from the red one, we can say OK.<br/>
+	<input type="button" value="draw a black line" onclick="drawBlackLine(this);"/>
+</p>
+<hr/>
+<svg id="svgCanvas" xmlns="http://www.w3.org/2000/svg" width="800" height="300" viewBox="0 0 800 300">
+	<path
+		id="originalPath"
+		fill="none"
+		stroke="#ff0000"
+		stroke-width="1"
+		d="
+			M 10 10
+			L 380 280
+			H 50
+			V 100
+			C 120 0 240 30 300 90
+			S 100 270 140 280
+			Q 400 280 380 190
+			T 380 10
+			A 80 120 0 0 1 310 20
+			S 280 30 280 15
+			T 260 10
+			Z"></path>
+</svg>
+
+</body>
+</html>

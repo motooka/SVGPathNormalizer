@@ -2,139 +2,230 @@
 var SVGPathNormalizer = {};
 
 SVGPathNormalizer.normalize = function(pathSegList) {
-	var newPathSegList = 
-};
-
-
-
-SVGPathNormalizer.normalizeSingleSeg = function(seg, curX, curY, startX, startY) {
-	/*
-		This method returns an array which looks like...
-		{
-			seg: (an instance of SVGPathSeg http://www.w3.org/TR/SVG/paths.html#InterfaceSVGPathSeg),
-			newX: (decimal),
-			newY: (decimal)
-		}
-		
-		The argument startX and startY can be omitted.
-		These arguments will be used if seg is an instance of SVGPathSegClosePath
-	*/
+	var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+	var newPathSegList = path.pathSegList;
+	var seg = null;
 	var newSeg = null;
+	var curX = 0;
+	var curY = 0;
 	var newX = 0;
 	var newY = 0;
-	var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+	var startX = null;
+	var startY = null;
+	var lastCommandIsCubicBezier = false;
+	var lastCommandIsQuadraticBezier = false;
+	var lastControllX = null;
+	var lastControllY = null;
+	var thisCommandIsCubicBezier = false;
+	var thisCommandIsQuadraticBezier = false;
 	
-	switch(seg.pathSegType) {
-		// z
-		case PATHSEG_CLOSEPATH:
-			newX = startX;
-			newY = startY;
-			newSeg = path.createSVGPathSegClosePath();
-			break;
-		case 
+	
+	for(var i=0; i<pathSegList.numberOfItems; i++) {
+		seg = pathSegList.getItem(i);
+		thisCommandIsCubicBezier = false;
+		thisCommandIsQuadraticBezier = false;
+		switch(seg.pathSegType) {
+			// z
+			case SVGPathSeg.PATHSEG_CLOSEPATH:
+				newX = startX;
+				newY = startY;
+				newSeg = path.createSVGPathSegClosePath();
+				startX = null;
+				startY = null;
+				break;
+			
+			// M
+			case SVGPathSeg.PATHSEG_MOVETO_ABS:
+				newX = seg.x;
+				newY = seg.y;
+				newSeg = path.createSVGPathSegMovetoAbs(newX, newY);
+				break;
+			
+			// m
+			case SVGPathSeg.PATHSEG_MOVETO_REL:
+				newX = curX + seg.x;
+				newY = curY + seg.y;
+				newSeg = path.createSVGPathSegMovetoAbs(newX, newY);
+				break;
+			
+			case SVGPathSeg.PATHSEG_LINETO_ABS:
+				newX = seg.x;
+				newY = seg.y;
+				newSeg = path.createSVGPathSegLinetoAbs(newX, newY);
+				break;
+			
+			case SVGPathSeg.PATHSEG_LINETO_REL:
+				newX = curX + seg.x;
+				newY = curY + seg.y;
+				newSeg = path.createSVGPathSegLinetoAbs(newX, newY);
+				break;
+			
+			case SVGPathSeg.PATHSEG_CURVETO_CUBIC_ABS:
+				newX = seg.x;
+				newY = seg.y;
+				lastControllX = seg.x2;
+				lastControllY = seg.y2;
+				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, seg.x1, seg.y1, seg.x2, seg.y2);
+				thisCommandIsCubicBezier = true;
+				break;
+			
+			case SVGPathSeg.PATHSEG_CURVETO_CUBIC_REL:
+				newX = curX + seg.x;
+				newY = curY + seg.y;
+				lastControllX = curX + seg.x2;
+				lastControllY = curY + seg.y2;
+				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, (curX + seg.x1), (curY + seg.y1), (curX + seg.x2), (curY + seg.y2));
+				thisCommandIsCubicBezier = true;
+				break;
+			
+			case SVGPathSeg.PATHSEG_CURVETO_QUADRATIC_ABS:
+				newX = seg.x;
+				newY = seg.y;
+				lastControllX = seg.x1;
+				lastControllY = seg.y1;
+				newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, seg.x1, seg.y1);
+				thisCommandIsQuadraticBezier = true;
+				break;
+			
+			case SVGPathSeg.PATHSEG_CURVETO_QUADRATIC_REL:
+				newX = curX + seg.x;
+				newY = curY + seg.y;
+				lastControllX = curX + seg.x1;
+				lastControllY = curY + seg.y1;
+				newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, (curX + seg.x1), (curY + seg.y1));
+				thisCommandIsQuadraticBezier = true;
+				break;
+			
+			case SVGPathSeg.PATHSEG_ARC_ABS:
+				newX = seg.x;
+				newY = seg.y;
+				newSeg = path.createSVGPathSegArcAbs(newX, newY, seg.r1, seg.r2, seg.angle, seg.largeArgFlag, seg.sweepFlag);
+				break;
+			
+			case SVGPathSeg.PATHSEG_ARC_REL:
+				newX = curX + seg.x;
+				newY = curY + seg.y;
+				newSeg = path.createSVGPathSegArcAbs(newX, newY, seg.r1, seg.r2, seg.angle, seg.largeArgFlag, seg.sweepFlag);
+				break;
+			
+			case SVGPathSeg.PATHSEG_LINETO_HORIZONTAL_ABS:
+				newX = seg.x;
+				newY = curY;
+				newSeg = path.createSVGPathSegLinetoAbs(newX, newY);
+				break;
+			
+			case SVGPathSeg.PATHSEG_LINETO_HORIZONTAL_REL:
+				newX = curX + seg.x;
+				newY = curY;
+				newSeg = path.createSVGPathSegLinetoAbs(newX, newY);
+				break;
+			
+			case SVGPathSeg.PATHSEG_LINETO_VERTICAL_ABS:
+				newX = curX;
+				newY = seg.y;
+				newSeg = path.createSVGPathSegLinetoAbs(newX, newY);
+				break;
+			
+			case SVGPathSeg.PATHSEG_LINETO_VERTICAL_REL:
+				newX = curX;
+				newY = curY + seg.y;
+				newSeg = path.createSVGPathSegLinetoAbs(newX, newY);
+				break;
+			
+			case SVGPathSeg.PATHSEG_CURVETO_CUBIC_SMOOTH_ABS:
+				newX = seg.x;
+				newY = seg.y;
+				var firstControlX = curX;
+				var firstControlY = curY;
+				if(lastCommandIsCubicBezier) {
+					var refl = SVGPathNormalizer.getReflectionPoint(lastControllX, lastControllY, curX, curY);
+					firstControlX = refl.x;
+					firstControlY = refl.y;
+				}
+				lastControllX = seg.x2;
+				lastControllY = seg.y2;
+				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, firstControlX, firstControlY, lastControllX, lastControllY);
+				thisCommandIsCubicBezier = true;
+				break;
+			
+			case SVGPathSeg.PATHSEG_CURVETO_CUBIC_SMOOTH_REL:
+				newX = curX + seg.x;
+				newY = curX + seg.y;
+				var firstControlX = curX;
+				var firstControlY = curY;
+				if(lastCommandIsCubicBezier) {
+					var refl = SVGPathNormalizer.getReflectionPoint(lastControllX, lastControllY, curX, curY);
+					firstControlX = refl.x;
+					firstControlY = refl.y;
+				}
+				lastControllX = (curX + seg.x2);
+				lastControllY = (curY + seg.y2);
+				newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, firstControlX, firstControlY, lastControllX, lastControllY);
+				thisCommandIsCubicBezier = true;
+				break;
+				
+			case SVGPathSeg.PATHSEG_CURVETO_QUADRATIC_SMOOTH_ABS:
+				newX = seg.x;
+				newY = seg.y;
+				var firstControlX = curX;
+				var firstControlY = curY;
+				if(lastCommandIsQuadraticBezier) {
+					var refl = SVGPathNormalizer.getReflectionPoint(lastControllX, lastControllY, curX, curY);
+					firstControlX = refl.x;
+					firstControlY = refl.y;
+				}
+				newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, firstControlX, firstControlY);
+				lastControllX = firstControlX;
+				lastControllY = firstControlY;
+				thisCommandIsQuadraticBezier = true;
+				break;
+			
+			case SVGPathSeg.PATHSEG_CURVETO_QUADRATIC_SMOOTH_REL:
+				newX = curX + seg.x;
+				newY = curY + seg.y;
+				var firstControlX = curX;
+				var firstControlY = curY;
+				if(lastCommandIsQuadraticBezier) {
+					var refl = SVGPathNormalizer.getReflectionPoint(lastControllX, lastControllY, curX, curY);
+					firstControlX = refl.x;
+					firstControlY = refl.y;
+				}
+				newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, firstControlX, firstControlY);
+				lastControllX = firstControlX;
+				lastControllY = firstControlY;
+				thisCommandIsQuadraticBezier = true;
+				break;
+				
+			default:
+				newSeg = seg;
+				break;
+		}
+		newPathSegList.appendItem(newSeg);
+		curX = newX;
+		curY = newY;
+		if(startX === null && startY === null) {
+			startX = curX;
+			startY = curY;
+		}
 		
-		// M
-		case PATHSEG_MOVETO_ABS:
-			newX = seg.x;
-			newY = seg.y;
-			newSeg = seg;
-			break;
-		
-		// m
-		case PATHSEG_MOVETO_REL:
-			newX = curX + seg.x;
-			newY = curY + seg.y;
-			newSeg = path.createSVGPathSegMovetoAbs(newX, newY);
-			break;
-		
-		case PATHSEG_LINETO_ABS:
-			newX = seg.x;
-			newY = seg.y;
-			newSeg = seg;
-			break;
-		
-		case PATHSEG_LINETO_REL:
-			newX = curX + seg.x;
-			newY = curY + seg.y;
-			newSeg = path.createSVGPathSegLinetoAbs(newX, newY);
-			break;
-		
-		case PATHSEG_CURVETO_CUBIC_ABS:
-			newX = seg.x;
-			newY = seg.y;
-			newSeg = seg;
-			break;
-		
-		case PATHSEG_CURVETO_CUBIC_REL:
-			newX = curX + seg.x;
-			newY = curY + seg.y;
-			newSeg = path.createSVGPathSegCurvetoCubicAbs(newX, newY, (curX + seg.x1), (curY + seg.y1), (curX + seg.x2), (curY + seg.y2));
-			break;
-		
-		case PATHSEG_CURVETO_QUADRATIC_ABS:
-			newX = seg.x;
-			newY = seg.y;
-			newSeg = seg;
-			break;
-		
-		case PATHSEG_CURVETO_QUADRATIC_REL:
-			newX = curX + seg.x;
-			newY = curY + seg.y;
-			newSeg = path.createSVGPathSegCurvetoQuadraticAbs(newX, newY, (curX + seg.x1), (curY + seg.y1));
-			break;
-		
-		case PATHSEG_ARC_ABS:
-			newX = seg.x;
-			newY = seg.y;
-			newSeg = seg;
-			break;
-		
-		case PATHSEG_ARC_REL:
-			newX = curX + seg.x;
-			newY = curY + seg.y;
-			newSeg = path.createSVGPathSegArcAbs(newX, newY, seg.r1, seg.r2, seg.angle, seg.largeArgFlag, seg.sweepFlag);
-			break;
-		
-		case PATHSEG_LINETO_HORIZONTAL_ABS:
-			newX = seg.x;
-			newY = curY;
-			newSeg = seg;
-			break;
-		
-		case PATHSEG_LINETO_HORIZONTAL_REL:
-			newX = curX + seg.x;
-			newY = curY;
-			newSeg = path.createSVGPathSegLinetoHorizontalAbs(newX);
-			break;
-		
-		case PATHSEG_LINETO_VERTICAL_ABS:
-			newX = curX;
-			newY = seg.y;
-			newSeg = seg;
-			break;
-		
-		case PATHSEG_LINETO_VERTICAL_REL:
-		
-		case PATHSEG_CURVETO_CUBIC_SMOOTH_ABS:
-			newX = seg.x;
-			newY = seg.y;
-			newSeg = seg;
-			break;
-		
-		case PATHSEG_CURVETO_CUBIC_SMOOTH_REL:
-		case PATHSEG_CURVETO_QUADRATIC_SMOOTH_ABS:
-			newX = seg.x;
-			newY = seg.y;
-			newSeg = seg;
-			break;
-		
-		case PATHSEG_CURVETO_QUADRATIC_SMOOTH_REL:
-		default:
+		if(thisCommandIsCubicBezier || thisCommandIsQuadraticBezier) {
+			// do nothing
+		}
+		else {
+			// clear last controll point
+			lastControllX = null;
+			lastControllY = null;
+		}
+		lastCommandIsCubicBezier = thisCommandIsCubicBezier;
+		lastCommandIsQuadraticBezier = thisCommandIsQuadraticBezier;
 	}
 	
+	return newPathSegList;
+};
+
+SVGPathNormalizer.getReflectionPoint = function(lastControllX, lastControllY, curX, curY) {
 	return {
-		seg: newSeg,
-		newX: curX,
-		newY: curY
+		x: curX + (curX - lastControllX),
+		y: curY + (curY - lastControllY)
 	};
 };
