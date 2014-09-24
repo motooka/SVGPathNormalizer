@@ -1,4 +1,12 @@
-
+/**
+ * SVGPathNormalizer
+ * https://github.com/motooka/SVGPathNormalizer
+ * 
+ * Copyright (c) Tadahisa Motooka
+ * Licensed under the MIT license
+ * See the file "LICENSE" for more detail.
+ * 
+ */
 var SVGPathNormalizer = {};
 
 SVGPathNormalizer.normalize = function(pathSegList) {
