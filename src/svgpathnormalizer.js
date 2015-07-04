@@ -107,13 +107,13 @@ SVGPathNormalizer.normalize = function(pathSegList) {
 			case SVGPathSeg.PATHSEG_ARC_ABS:
 				newX = seg.x;
 				newY = seg.y;
-				newSeg = path.createSVGPathSegArcAbs(newX, newY, seg.r1, seg.r2, seg.angle, seg.largeArgFlag, seg.sweepFlag);
+				newSeg = path.createSVGPathSegArcAbs(newX, newY, seg.r1, seg.r2, seg.angle, seg.largeArcFlag, seg.sweepFlag);
 				break;
 			
 			case SVGPathSeg.PATHSEG_ARC_REL:
 				newX = curX + seg.x;
 				newY = curY + seg.y;
-				newSeg = path.createSVGPathSegArcAbs(newX, newY, seg.r1, seg.r2, seg.angle, seg.largeArgFlag, seg.sweepFlag);
+				newSeg = path.createSVGPathSegArcAbs(newX, newY, seg.r1, seg.r2, seg.angle, seg.largeArcFlag, seg.sweepFlag);
 				break;
 			
 			case SVGPathSeg.PATHSEG_LINETO_HORIZONTAL_ABS:
