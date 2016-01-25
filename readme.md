@@ -26,3 +26,6 @@ Please note that the original `<path>` will NOT be modified even if you modify t
 ## Requirement ##
 Your runtime environment MUST support SVG 1.1. Most modern web browsers - including Internet Explorer 11 - match the requirement.
 
+Chrome 48 and Firefox 43 have removed `SVGPathSegList` implementation. So you will also require [SVGPathSeg polyfill](https://github.com/progers/pathseg).
+
+
